@@ -136,7 +136,7 @@ class Auth extends CI_Controller {
     if ($token === FALSE)
     {
       // redirect user to google authentication
-      header('Location: ' . Zend_Gdata_AuthSub::getAuthSubTokenUri('http://dubistkomisch.co.cc/noutube/auth/token', 'http://gdata.youtube.com', false, true));
+      header('Location: ' . Zend_Gdata_AuthSub::getAuthSubTokenUri(site_url('auth/token'), 'http://gdata.youtube.com', false, true));
     }
     else
     {
