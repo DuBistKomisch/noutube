@@ -32,7 +32,11 @@ You'll also need to add a few of your own to the end of the file:
  - $config['applicationID']
  - $config['developerKey']
 
-Both of which can be obtained by going to http://code.google.com/apis/youtube/dashboard
+Both of which can be obtained by going to http://code.google.com/apis/youtube/dashboard, and finally:
+
+ - $config['applicationName']
+
+Which is the name to use to brand the site.
 
 Database
 --------

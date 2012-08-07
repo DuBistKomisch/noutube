@@ -12,16 +12,19 @@ class Auth extends MY_Controller {
     $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[8]');
     $this->form_validation->set_rules('password_verify', 'Password Verification', 'trim|required|matches[password]');
 
-    $this->load->view('header');
     if ($this->session->userdata('username') !== FALSE)
     {
       // already signed in
+      $this->load->view('header');
       $this->load->view('register_already');
+      $this->load->view('footer');
     }
     else if ($this->form_validation->run() === FALSE)
     {
       // show form
+      $this->load->view('header');
       $this->load->view('register_form');
+      $this->load->view('footer');
     }
     else
     {
@@ -37,9 +40,8 @@ class Auth extends MY_Controller {
       $this->db->insert('users', $record);
       $this->session->set_userdata('username', $record['username']);
 
-      $this->load->view('register_success', array('signedin' => true, 'username' => $record['username']));
+      redirect('home');
     }
-    $this->load->view('footer');
   }
 
   // allow a registered user to sign in to a session
@@ -52,16 +54,19 @@ class Auth extends MY_Controller {
     $this->form_validation->set_rules('username', 'Username', 'trim|required|xss_clean');
     $this->form_validation->set_rules('password', 'Password', 'trim|required|callback_check_credentials');
 
-    $this->load->view('header');
     if ($this->session->userdata('username') !== FALSE)
     {
       // already signed in
+      $this->load->view('header');
       $this->load->view('signin_already');
+      $this->load->view('footer');
     }
     else if ($this->form_validation->run() === FALSE)
     {
       // show form
+      $this->load->view('header');
       $this->load->view('signin_form');
+      $this->load->view('footer');
     }
     else
     {
@@ -75,9 +80,8 @@ class Auth extends MY_Controller {
       if ($token !== NULL)
         $this->session->set_userdata('token', $token);
 
-      $this->load->view('signin_success', array('signedin' => true, 'username' => $username));
+      redirect('home');
     }
-    $this->load->view('footer');
   }
 
   // validates username and password combination

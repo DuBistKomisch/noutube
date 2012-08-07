@@ -14,7 +14,7 @@ class Home extends MY_Controller
 
       $subscriptionFeed = $yt->getSubscriptionFeed('default');
       foreach ($subscriptionFeed as $subscriptionEntry)
-        echo $subscriptionEntry->title->text . "<br>\n";
+        $this->load->view('subscription', array('sub' => $subscriptionEntry));
     }
     else
     {
