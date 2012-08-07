@@ -1,4 +1,36 @@
 NoUTube
 =======
 
-YouTube subscription aggregator and organiser
+YouTube subscription aggregator and organiser.
+
+Written using PHP with the CodeIgniter framework.
+
+Uses the Zend GData and PHPass libraries.
+
+Requirements
+============
+
+ - PHP 5.2.x or higher
+ - Apache2 mod_rewrite for URLs without "index.php"
+
+Config
+======
+
+You'll need to modify these variables in application/config/config.php to get started:
+
+ - $config['base_url']
+ - $config['index_page'] (if using mod_rewrite, which is not necessary)
+ - $config['encryption_key'] and $config['sess_secure'] (if using secure sessions, which is not necessary)
+ - $config['sess_user_database'] (if storing sessions in a database, which is not necessary)
+ - $config['cookie_domain'] and $['cookie_path']
+
+Next you'll need to set up a database. Any DBMS supported by CodeIgniter should work.
+
+Create a table 'users' with the following fields:
+ - username, varchar(16)
+ - hash, char(60)
+ - token, text
+
+Lastly you'll need to add the database connection details to application/config/database.php.
+
+If you want to store session data in a database too, refer to the CodeIgniter Sessions documentation.
