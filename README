@@ -16,6 +16,9 @@ Requirements
 Installation
 ============
 
+Config
+------
+
 You'll need to modify these variables in application/config/config.php to get started:
 
  - $config['base_url']
@@ -23,6 +26,16 @@ You'll need to modify these variables in application/config/config.php to get st
  - $config['encryption_key'] and $config['sess_secure'] (if using secure sessions, which is not necessary)
  - $config['sess_user_database'] (if storing sessions in a database, which is not necessary)
  - $config['cookie_domain'] and $['cookie_path']
+
+You'll also need to add a few of your own to the end of the file:
+
+ - $config['applicationID']
+ - $config['developerKey']
+
+Both of which can be obtained by going to http://code.google.com/apis/youtube/dashboard
+
+Database
+--------
 
 Next you'll need to set up a database. Any DBMS supported by CodeIgniter should work.
 
@@ -34,6 +47,9 @@ Create a table 'users' with the following fields:
 Lastly you'll need to add the database connection details to application/config/database.php.
 
 If you want to store session data in a database too, refer to the CodeIgniter Sessions documentation.
+
+Notes
+-----
 
 If you're going to be pushing commits back to github, you don't want to your personalised config files to be included. While you can simply not add them to the commit, I suggest running the following commands to make git ignore changes made:
  git update-index --assume-unchanged application/config/config.php

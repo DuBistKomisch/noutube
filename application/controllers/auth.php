@@ -1,13 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Auth extends CI_Controller {
-  // set include path
-  public function __construct () {
-    parent::__construct();
-
-    set_include_path('.:./lib/');
-  }
-
+class Auth extends MY_Controller {
   // allow a user to register an account
   public function register()
   {
@@ -44,7 +37,7 @@ class Auth extends CI_Controller {
       $this->db->insert('users', $record);
       $this->session->set_userdata('username', $record['username']);
 
-      $this->load->view('register_success', array('username' => $record['username']));
+      $this->load->view('register_success', array('signedin' => true, 'username' => $record['username']));
     }
     $this->load->view('footer');
   }
@@ -82,7 +75,7 @@ class Auth extends CI_Controller {
       if ($token !== NULL)
         $this->session->set_userdata('token', $token);
 
-      $this->load->view('signin_success', array('username' => $username));
+      $this->load->view('signin_success', array('signedin' => true, 'username' => $username));
     }
     $this->load->view('footer');
   }
@@ -111,9 +104,7 @@ class Auth extends CI_Controller {
   public function signout()
   {
     $this->session->sess_destroy();
-    $this->load->view('header');
-    $this->load->view('signout_success');
-    $this->load->view('footer');
+    redirect('home');
   }
 
   // for authenticating the user with google
@@ -123,7 +114,7 @@ class Auth extends CI_Controller {
     $username = $this->session->userdata('username');
     if ($username === FALSE)
     {
-      header('Location: ' . site_url('auth/signin'));
+      redirect('auth/signup');
       return;
     }
 
@@ -136,7 +127,7 @@ class Auth extends CI_Controller {
     if ($token === FALSE)
     {
       // redirect user to google authentication
-      header('Location: ' . Zend_Gdata_AuthSub::getAuthSubTokenUri(site_url('auth/token'), 'http://gdata.youtube.com', false, true));
+      redirect(Zend_Gdata_AuthSub::getAuthSubTokenUri(site_url('auth/token'), 'http://gdata.youtube.com', false, true));
     }
     else
     {
@@ -146,7 +137,8 @@ class Auth extends CI_Controller {
       $this->db->update('users', array('token' => $this->session->userdata('token')));
 
       // redirect to home page
-      header('Location: ' . site_url());
+      redirect('home');
     }
   }
 }
+?>
