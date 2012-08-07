@@ -13,8 +13,8 @@ Requirements
  - PHP 5.2.x or higher
  - Apache2 mod_rewrite for URLs without "index.php"
 
-Config
-======
+Installation
+============
 
 You'll need to modify these variables in application/config/config.php to get started:
 
@@ -34,3 +34,7 @@ Create a table 'users' with the following fields:
 Lastly you'll need to add the database connection details to application/config/database.php.
 
 If you want to store session data in a database too, refer to the CodeIgniter Sessions documentation.
+
+If you're going to be pushing commits back to github, you don't want to your personalised config files to be included. While you can simply not add them to the commit, I suggest running the following commands to make git ignore changes made:
+ git update-index --assume-unchanged application/config/config.php
+ git update-index --assume-unchanged application/config/database.php
