@@ -40,7 +40,7 @@ class Auth extends MY_Controller {
       $this->db->insert('users', $record);
       $this->session->set_userdata('username', $record['username']);
 
-      redirect('home');
+      redirect('home', 'refresh');
     }
   }
 
@@ -80,7 +80,7 @@ class Auth extends MY_Controller {
       if ($token !== NULL)
         $this->session->set_userdata('token', $token);
 
-      redirect('home');
+      redirect('home', 'refresh');
     }
   }
 
@@ -108,7 +108,7 @@ class Auth extends MY_Controller {
   public function signout()
   {
     $this->session->sess_destroy();
-    redirect('home');
+    redirect('home', 'refresh');
   }
 
   // for authenticating the user with google
@@ -118,7 +118,7 @@ class Auth extends MY_Controller {
     $username = $this->session->userdata('username');
     if ($username === FALSE)
     {
-      redirect('auth/signup');
+      redirect('auth/signin', 'refresh');
       return;
     }
 
@@ -141,7 +141,7 @@ class Auth extends MY_Controller {
       $this->db->update('users', array('token' => $this->session->userdata('token')));
 
       // redirect to home page
-      redirect('home');
+      redirect('home', 'refresh');
     }
   }
 }
