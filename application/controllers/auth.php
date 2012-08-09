@@ -8,9 +8,10 @@ class Auth extends MY_Controller {
     $this->load->library(array('form_validation'));
 
     // set validation rules
+    $this->form_validation->set_error_delimiters('', '');
     $this->form_validation->set_rules('username', 'Username', 'trim|required|min_length[3]|max_length[16]|is_unique[users.username]|xss_clean');
     $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[8]');
-    $this->form_validation->set_rules('password_verify', 'Password Verification', 'trim|required|matches[password]');
+    $this->form_validation->set_rules('password_verify', 'Verify', 'trim|required|matches[password]');
 
     if ($this->session->userdata('username') !== FALSE)
     {
@@ -51,6 +52,7 @@ class Auth extends MY_Controller {
     $this->load->library(array('form_validation'));
 
     // set validation rules
+    $this->form_validation->set_error_delimiters('', '');
     $this->form_validation->set_rules('username', 'Username', 'trim|required|xss_clean');
     $this->form_validation->set_rules('password', 'Password', 'trim|required|callback_check_credentials');
 
