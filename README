@@ -43,12 +43,25 @@ Database
 
 Next you'll need to set up a database. Any DBMS supported by CodeIgniter should work.
 
-Create a table 'users' with the following fields:
- - username, varchar(16)
+Create the following tables:
+
+users
+ - username, varchar(16), primary
  - hash, char(60)
  - token, text
 
-Lastly you'll need to add the database connection details to application/config/database.php.
+subscriptions
+ - username, varchar(100), primary
+ - display, varchar(100)
+ - thumbnail, varchar(100)
+ - updated, int(11)
+ - checked, int(11), default 0
+
+subscribed
+ - user, varchar(16), primary
+ - subscription, varchar(100), primary
+
+Lastly you'll need to add the database connection details to application/config/database.php. Be sure to set database debugging to FALSE.
 
 If you want to store session data in a database too, refer to the CodeIgniter Sessions documentation.
 
