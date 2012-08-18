@@ -12,7 +12,7 @@ class Home extends MY_Controller
       $this->load->view('home');
 
       // show subscriptions
-      $this->db->select('username, display, thumbnail');
+      $this->db->select('display, thumbnail');
       $this->db->join('subscribed', 'username=subscription');
       $this->db->where('user', $this->session->userdata('username'));
       $results = $this->db->get('subscriptions');
