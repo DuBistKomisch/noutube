@@ -68,6 +68,6 @@ If you want to store session data in a database too, refer to the CodeIgniter Se
 Notes
 -----
 
-If you're going to be pushing commits back to github, you don't want to your personalised config files to be included. While you can simply not add them to the commit, I suggest running the following commands to make git ignore changes made:
+If you're going to be pushing commits back to github, you don't want your personalised config files to be included. While you can simply not add them to the commit, I suggest running the following commands to make git ignore changes made:
  git update-index --assume-unchanged application/config/config.php
  git update-index --assume-unchanged application/config/database.php
