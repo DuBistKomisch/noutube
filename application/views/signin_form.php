@@ -1,3 +1,4 @@
+<h2>Sign In</h2>
 <?php echo form_open('auth/signin'); ?>
 <table>
   <tr>

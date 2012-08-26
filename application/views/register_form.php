@@ -1,3 +1,4 @@
+<h2>Register</h2>
 <?php echo form_open('auth/register'); ?>
 <table>
   <tr>

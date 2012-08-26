@@ -12,7 +12,7 @@ class Home extends MY_Controller
       $this->load->view('home');
 
       // show subscriptions
-      $this->db->select('display, thumbnail');
+      $this->db->select('display, thumbnail, checked');
       $this->db->join('subscribed', 'username=subscription');
       $this->db->where('user', $this->session->userdata('username'));
       $results = $this->db->get('subscriptions');
@@ -27,8 +27,23 @@ class Home extends MY_Controller
     else
     {
       // not signed in
-      $this->load->view('welcome');
+      $this->load->view('home_welcome');
     }
+    $this->load->view('footer');
+  }
+
+  // displays privacy statement
+  public function privacy()
+  {
+    $this->load->view('header');
+    $this->load->view('home_privacy');
+    $this->load->view('footer');
+  }
+
+  public function error404()
+  {
+    $this->load->view('header');
+    $this->load->view('home_404');
     $this->load->view('footer');
   }
 
@@ -38,6 +53,10 @@ class Home extends MY_Controller
     // redirect if not authenticated
     if ($this->session->userdata('token') === FALSE)
       redirect('home', 'refresh');
+
+    // counters
+    $added = 0;
+    $removed = 0;
 
     // check what we think the user is subscribed to
     $this->db->select('subscription');
@@ -68,6 +87,11 @@ class Home extends MY_Controller
           $this->db->update('subscriptions', $subscription);
         }
         // set as subscribed by user
+        if (!isset($existing[$subscription['username']]))
+        {
+          $added++;
+          $existing[$subscription['username']] = FALSE;
+        }
         if ($existing[$subscription['username']] !== TRUE)
           $this->db->insert('subscribed', array('user' => $this->session->userdata('username'), 'subscription' => $subscription['username']));
         $existing[$subscription['username']] = FALSE;
@@ -84,6 +108,7 @@ class Home extends MY_Controller
     foreach ($existing as $subscription => $value)
       if ($value === TRUE)
       {
+        $removed++;
         $this->db->where('user', $this->session->userdata('username'));
         $this->db->where('subscription', $subscription);
         $this->db->delete('subscribed');
@@ -96,6 +121,11 @@ class Home extends MY_Controller
       $this->db->where('username', $row->username);
       $this->db->delete('subscriptions');
     }
+
+    // output
+    $this->load->view('header');
+    $this->load->view('home_update', array('added' => $added, 'removed' => $removed));
+    $this->load->view('footer');
   }
 }
 ?>

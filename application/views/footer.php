@@ -1,11 +1,12 @@
     <div id="footer">
 <?php if ($signedin): ?>
-      <span>Signed in as <?php echo $username; ?></span>
-      <span><?php echo anchor('auth/signout', 'Sign Out'); ?></span>
+      <p>Signed in as <?php echo $username; ?></p>
+      <p><?php echo anchor('auth/signout', 'Sign Out'); ?></p>
 <?php else: ?>
-      <span><?php echo anchor('auth/signin', 'Sign In'); ?></span>
-      <span><?php echo anchor('auth/register', 'Register'); ?></span>
+      <p><?php echo anchor('auth/signin', 'Sign In'); ?> or <?php echo anchor('auth/register', 'Register'); ?></p>
 <?php endif; ?>
+      <p><?php echo anchor('home/privacy', 'Privacy Statement'); ?></p>
+      <p>&copy; Copyright 2012 <?php echo anchor('http://www.jakebarnes.com.au', 'Jake Barnes'); ?></p>
     </div>
   </body>
 </html>
