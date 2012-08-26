@@ -142,8 +142,8 @@ class Auth extends MY_Controller {
       $this->db->where('username', $username);
       $this->db->update('users', array('token' => $this->session->userdata('token')));
 
-      // redirect to home page
-      redirect('home', 'refresh');
+      // redirect to update subscriptions
+      redirect('videos/update', 'refresh');
     }
   }
 }

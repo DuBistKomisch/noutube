@@ -7,3 +7,4 @@
   </head>
   <body>
     <h1><?php echo anchor(site_url(), $applicationName); ?></h1>
+
