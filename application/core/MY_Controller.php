@@ -23,14 +23,14 @@ class MY_Controller extends CI_Controller
     }
     $this->load->vars($vars);
 
+    require_once('Zend/Loader.php');
+    Zend_Loader::loadClass('Zend_Gdata_AuthSub');
+    Zend_Loader::loadClass('Zend_Gdata_YouTube');
     if ($this->session->userdata('token') !== FALSE)
-    {
-      require_once('Zend/Loader.php');
-      Zend_Loader::loadClass('Zend_Gdata_AuthSub');
-      Zend_Loader::loadClass('Zend_Gdata_YouTube');
       $this->yt = new Zend_Gdata_YouTube(Zend_Gdata_AuthSub::getHttpClient($this->session->userdata('token')), $this->config->item('applicationID'), NULL, $this->config->item('developerKey'));
-      $this->yt->setMajorProtocolVersion(2);
-    }
+    else
+      $this->yt = new Zend_Gdata_YouTube();
+    $this->yt->setMajorProtocolVersion(2);
   }
 }
 ?>

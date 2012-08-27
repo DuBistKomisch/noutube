@@ -45,25 +45,52 @@ Next you'll need to set up a database. Any DBMS supported by CodeIgniter should 
 
 Create the following tables:
 
-users
+user
  - username, varchar(16), primary
  - hash, char(60)
  - token, text
 
-subscriptions
+channel
  - username, varchar(100), primary
  - display, varchar(100)
  - thumbnail, varchar(100)
- - updated, int(11)
- - checked, int(11), default 0
+ - updated, int
+ - checked, int, default 0
 
-subscribed
+subscription
  - user, varchar(16), primary
- - subscription, varchar(100), primary
+ - channel, varchar(100), primary
+ - new, int, default 0
+ - later, int, default 0
+
+video
+ - video, char(11), primary
+ - title, text
+ - description, text
+ - duration, int
+ - published, int
+ - channel, varchar(100)
+
+item
+ - user, varchar(16), primary
+ - video, char(11), primary
+ - channel, varchar(100)
+ - state, int
 
 Lastly you'll need to add the database connection details to application/config/database.php. Be sure to set database debugging to FALSE.
 
 If you want to store session data in a database too, refer to the CodeIgniter Sessions documentation.
+
+Cron
+----
+
+NoUTube requires a background service to regularly poll for new videos.
+
+Simply run crontab -e and add the line:
+
+0 * * * * /path/to/index.php videos poll
+
+There's plenty of documentation on how cron works, so I won't explain it here. Just suffice to say that this will run the service once an hour on the hour.
 
 Notes
 -----

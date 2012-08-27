@@ -9,7 +9,7 @@ class Auth extends MY_Controller {
 
     // set validation rules
     $this->form_validation->set_error_delimiters('', '');
-    $this->form_validation->set_rules('username', 'Username', 'trim|required|min_length[3]|max_length[16]|is_unique[users.username]|xss_clean');
+    $this->form_validation->set_rules('username', 'Username', 'trim|required|min_length[3]|max_length[16]|is_unique[user.username]|xss_clean');
     $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[8]');
     $this->form_validation->set_rules('password_verify', 'Verify', 'trim|required|matches[password]');
 
@@ -38,7 +38,7 @@ class Auth extends MY_Controller {
         'hash' => $hasher->HashPassword($this->input->post('password'))
       );
 
-      $this->db->insert('users', $record);
+      $this->db->insert('user', $record);
       $this->session->set_userdata('username', $record['username']);
 
       redirect('home', 'refresh');
@@ -77,7 +77,7 @@ class Auth extends MY_Controller {
       $this->session->set_userdata('username', $username);
       $this->db->select('token');
       $this->db->where('username', $username);
-      $query = $this->db->get('users');
+      $query = $this->db->get('user');
       $token = $query->row()->token;
       if ($token !== NULL)
         $this->session->set_userdata('token', $token);
@@ -94,7 +94,7 @@ class Auth extends MY_Controller {
 
     $this->db->select('hash');
     $this->db->where('username', $this->input->post('username'));
-    $query = $this->db->get('users');
+    $query = $this->db->get('user');
     if ($query->num_rows() > 0 && $hasher->CheckPassword($password, $query->row()->hash))
     {
       return TRUE;
@@ -140,7 +140,7 @@ class Auth extends MY_Controller {
       // convert one-use token to session token and store in database
       $this->session->set_userdata('token', Zend_Gdata_AuthSub::getAuthSubSessionToken($token));
       $this->db->where('username', $username);
-      $this->db->update('users', array('token' => $this->session->userdata('token')));
+      $this->db->update('user', array('token' => $this->session->userdata('token')));
 
       // redirect to update subscriptions
       redirect('videos/update', 'refresh');
