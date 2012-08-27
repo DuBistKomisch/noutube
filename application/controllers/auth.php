@@ -1,6 +1,12 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Auth extends MY_Controller {
+  public function __construct()
+  {
+    parent::__construct();
+
+    $this->load->model('auth_model');
+  }
   // allow a user to register an account
   public function register()
   {
@@ -33,13 +39,8 @@ class Auth extends MY_Controller {
       require_once('PasswordHash.php');
       $hasher = new PasswordHash(8, FALSE);
 
-      $record = array(
-        'username' => $this->input->post('username'),
-        'hash' => $hasher->HashPassword($this->input->post('password'))
-      );
-
-      $this->db->insert('user', $record);
-      $this->session->set_userdata('username', $record['username']);
+      $this->auth_model->insert_user($hasher->HashPassword($this->input->post('password')));
+      $this->session->set_userdata('username', $this->input->post('username'));
 
       redirect('home', 'refresh');
     }
@@ -73,12 +74,8 @@ class Auth extends MY_Controller {
     else
     {
       // success, store username and token in session data
-      $username = $this->input->post('username');
-      $this->session->set_userdata('username', $username);
-      $this->db->select('token');
-      $this->db->where('username', $username);
-      $query = $this->db->get('user');
-      $token = $query->row()->token;
+      $this->session->set_userdata('username', $this->input->post('username'));
+      $token = $this->auth_model->get_user_token();
       if ($token !== NULL)
         $this->session->set_userdata('token', $token);
 
@@ -92,10 +89,8 @@ class Auth extends MY_Controller {
     require_once('PasswordHash.php');
     $hasher = new PasswordHash(8, FALSE);
 
-    $this->db->select('hash');
-    $this->db->where('username', $this->input->post('username'));
-    $query = $this->db->get('user');
-    if ($query->num_rows() > 0 && $hasher->CheckPassword($password, $query->row()->hash))
+    $hash = $this->auth_model->get_user_hash();
+    if ($hash !== NULL && $hasher->CheckPassword($password, $hash))
     {
       return TRUE;
     }
@@ -139,8 +134,7 @@ class Auth extends MY_Controller {
     {
       // convert one-use token to session token and store in database
       $this->session->set_userdata('token', Zend_Gdata_AuthSub::getAuthSubSessionToken($token));
-      $this->db->where('username', $username);
-      $this->db->update('user', array('token' => $this->session->userdata('token')));
+      $this->auth_model->set_user_token();
 
       // redirect to update subscriptions
       redirect('videos/update', 'refresh');

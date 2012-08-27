@@ -2,6 +2,13 @@
 
 class Videos extends MY_Controller
 {
+  public function __construct()
+  {
+    parent::__construct();
+
+    $this->load->model('videos_model');
+  }
+
   public function index()
   {
     // redirect if not authenticated
@@ -9,16 +16,8 @@ class Videos extends MY_Controller
       redirect('home', 'refresh');
 
     // fetch data
-    $this->db->select('display, thumbnail, checked, new, later');
-    $this->db->join('subscription', 'username=channel');
-    $this->db->where('user', $this->session->userdata('username'));
-    $this->db->where('new >', '0');
-    $results_new = $this->db->get('channel');
-    $this->db->select('display, thumbnail, checked, new, later');
-    $this->db->join('subscription', 'username=channel');
-    $this->db->where('user', $this->session->userdata('username'));
-    $this->db->where('later >', '0');
-    $results_later = $this->db->get('channel');
+    $results_new = $this->videos_model->list_new_subscriptions();
+    $results_later = $this->videos_model->list_later_subscriptions();
 
     // show subscriptions
     $this->load->view('header');
@@ -46,10 +45,7 @@ class Videos extends MY_Controller
       redirect('home', 'refresh');
 
     // fetch data
-    $this->db->select('display, thumbnail, checked, new, later');
-    $this->db->join('subscription', 'username=channel');
-    $this->db->where('user', $this->session->userdata('username'));
-    $results = $this->db->get('channel');
+    $results = $this->videos_model->list_subscriptions();
 
     // show subscriptions
     $this->load->view('header');
@@ -73,9 +69,7 @@ class Videos extends MY_Controller
     $removed = 0;
 
     // check what we think the user is subscribed to
-    $this->db->select('channel');
-    $this->db->where('user', $this->session->userdata('username'));
-    $results = $this->db->get('subscription');
+    $results = $this->videos_model->get_subscriptions();
     $existing = array();
     foreach ($results->result() as $row)
       $existing[$row->channel] = TRUE;
@@ -94,12 +88,7 @@ class Videos extends MY_Controller
           'updated' => time()
         );
         // insert or update
-        $this->db->insert('channel', $channel);
-        if ($this->db->_error_number() !== 0)
-        {
-          $this->db->where('username', $channel['username']);
-          $this->db->update('channel', $channel);
-        }
+        $this->videos_model->put_channel($channel);
         // set as subscribed by user
         if (!isset($existing[$channel['username']]))
         {
@@ -107,7 +96,7 @@ class Videos extends MY_Controller
           $existing[$channel['username']] = FALSE;
         }
         if ($existing[$channel['username']] !== TRUE)
-          $this->db->insert('subscription', array('user' => $this->session->userdata('username'), 'channel' => $channel['username']));
+          $this->videos_model->subscribe($channel['username']);
         $existing[$channel['username']] = FALSE;
       }
       // pagination
@@ -123,18 +112,11 @@ class Videos extends MY_Controller
       if ($value === TRUE)
       {
         $removed++;
-        $this->db->where('user', $this->session->userdata('username'));
-        $this->db->where('channel', $channel);
-        $this->db->delete('subscription');
+        $this->videos_model->unsubscribe($channel);
       }
 
-    // remove redundant subscriptions
-    $results = $this->db->query('SELECT DISTINCT username FROM channel LEFT JOIN subscription ON username=channel WHERE channel IS NULL;');
-    foreach ($results->result() as $row)
-    {
-      $this->db->where('username', $row->username);
-      $this->db->delete('channel');
-    }
+    // remove redundant channels and videos
+    $this->videos_model->cull_channels();
 
     // output
     $this->load->view('header');
@@ -152,9 +134,13 @@ class Videos extends MY_Controller
       return;
     }
 
+    // open log file
+    $log = fopen('poll.log', 'a');
+    if ($log !== FALSE)
+      fwrite($log, 'poll started at ' . date('Y-m-d H:i:s P') . PHP_EOL);
+
     // get list of channels
-    $this->db->select('username');
-    $channels = $this->db->get('channel');
+    $channels = $this->videos_model->get_channels();
     foreach ($channels->result() as $channel)
     {
       // fetch recent uploads
@@ -172,44 +158,31 @@ class Videos extends MY_Controller
           'channel' => $channel->username
         );
         // insert or update
-        $this->db->insert('video', $video);
-        if ($this->db->_error_number() !== 0)
-        {
-          // already exists, just update data
-          $this->db->where('video', $video['video']);
-          $this->db->update('video', $video);
-        }
-        else
+        if ($this->videos_model->put_video($video))
         {
           // inserted, give all subscribers an item for it
           $added++;
-          $this->db->select('user');
-          $this->db->where('channel', $channel->username);
-          $users = $this->db->get('subscription');
-          foreach ($users->result() as $user)
-            $this->db->insert('item', array('video' => $video['video'], 'user' => $user->user, 'channel' => $channel->username));
+          $this->videos_mode->push_video($channel->username, $video);
         }
       }
       // update last checked time for subscription
-      $this->db->where('username', $channel->username);
-      $this->db->update('channel', array('checked' => time()));
+      $this->videos_model->touch_channel($channel->username);
       // update 'new' counts if any were added
+      if ($log !== FALSE)
+        fwrite($log, $added . ' new videos found for ' . $channel->username . PHP_EOL);
       if ($added == 0)
         continue;
-      $updates = $this->db->query('SELECT subscription.user, COUNT(*) AS count FROM subscription LEFT JOIN item ON subscription.user=item.user AND subscription.channel=item.channel WHERE subscription.channel=\'' . $channel->username . '\' AND item.state=0 GROUP BY subscription.user, subscription.new HAVING COUNT(*) <> subscription.new');
-      foreach ($updates->result_array() as $row)
-      {
-        $this->db->where('user', $row['user']);
-        $this->db->update('subscription', array('new' => $row['count']));
-      }
+      $this->videos_model->update_new($channel->username);
     }
 
     // remove redundant videos
-    $results = $this->db->query('SELECT DISTINCT video.video FROM video LEFT JOIN item ON video.video=item.video WHERE item.video IS NULL;');
-    foreach ($results->result() as $row)
+    $this->videos_model->cull_videos();
+
+    // done
+    if ($log !== FALSE)
     {
-      $this->db->where('video', $row->video);
-      $this->db->delete('video');
+      fwrite($log, 'poll finished at ' . date('Y-m-d H:i:s P') . PHP_EOL);
+      fclose($log);
     }
   }
 }
