@@ -20,20 +20,20 @@ class Videos extends MY_Controller
     $results_later = $this->videos_model->list_later_subscriptions();
 
     // show subscriptions
-    $this->load->view('header');
+    $this->load->view('header', array('pageName' => 'Video Manager'));
     $this->load->view('videos/videos');
     
     $this->load->view('videos/new');
     if ($results_new->num_rows() == 0)
       $this->load->view('videos/new_none');
     else foreach ($results_new->result_array() as $row)
-      $this->load->view('videos/summary', $row);
+      $this->load->view('videos/channel', $row);
 
     $this->load->view('videos/later');
     if ($results_later->num_rows() == 0)
       $this->load->view('videos/later_none');
     else foreach ($results_later->result_array() as $row)
-      $this->load->view('videos/summary', $row);
+      $this->load->view('videos/channel', $row);
 
     $this->load->view('footer');
   }
@@ -48,11 +48,14 @@ class Videos extends MY_Controller
     $results = $this->videos_model->list_subscriptions();
 
     // show subscriptions
-    $this->load->view('header');
+    $this->load->view('header', array('pageName' => 'All Subscriptions'));
     $this->load->view('videos/videos');
 
+    $this->load->view('videos/all');
+    if ($results->num_rows() == 0)
+      $this->load->view('videos/all_none');
     foreach ($results->result_array() as $row)
-      $this->load->view('videos/summary', $row);
+      $this->load->view('videos/channel', $row);
 
     $this->load->view('footer');
   }
@@ -119,7 +122,7 @@ class Videos extends MY_Controller
     $this->videos_model->cull_channels();
 
     // output
-    $this->load->view('header');
+    $this->load->view('header', array('pageName' => 'Update Subscriptions'));
     $this->load->view('videos/update', array('added' => $added, 'removed' => $removed));
     $this->load->view('footer');
   }
@@ -141,11 +144,14 @@ class Videos extends MY_Controller
 
     // get list of channels
     $channels = $this->videos_model->get_channels();
+    if ($log !== NULL)
+      fwrite($log, 'got ' . $channels->num_rows() . ' channels' . PHP_EOL);
     foreach ($channels->result() as $channel)
     {
       // fetch recent uploads
       $added = 0;
       $uploads = $this->yt->getUserUploads(NULL, 'https://gdata.youtube.com/feeds/mobile/users/' . $channel->username . '/uploads?max-results=5');
+      $subscribers = $this->videos_model->get_subscribers($channel->username);
       foreach ($uploads->entry as $entry)
       {
         // construct video
@@ -162,14 +168,14 @@ class Videos extends MY_Controller
         {
           // inserted, give all subscribers an item for it
           $added++;
-          $this->videos_mode->push_video($channel->username, $video);
+          $this->videos_model->push_video($channel->username, $subscribers, $video);
         }
       }
       // update last checked time for subscription
       $this->videos_model->touch_channel($channel->username);
       // update 'new' counts if any were added
       if ($log !== FALSE)
-        fwrite($log, $added . ' new videos found for ' . $channel->username . PHP_EOL);
+        fwrite($log, $added . ' new videos found for ' . $channel->username . ' for ' . $subscribers->num_rows() . ' users ' . PHP_EOL);
       if ($added == 0)
         continue;
       $this->videos_model->update_new($channel->username);

@@ -1,6 +1,6 @@
     <div id="footer">
-<?php if ($signedin): ?>
-      <p>Signed in as <?php echo $username; ?></p>
+<?php if ($_signedin): ?>
+      <p>Signed in as <?php echo $_username; ?></p>
       <p><?php echo anchor('auth/signout', 'Sign Out'); ?></p>
 <?php else: ?>
       <p><?php echo anchor('auth/signin', 'Sign In'); ?> or <?php echo anchor('auth/register', 'Register'); ?></p>

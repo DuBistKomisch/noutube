@@ -14,12 +14,12 @@ class MY_Controller extends CI_Controller
     $username = $this->session->userdata('username');
     if ($username === FALSE)
     {
-      $vars['signedin'] = false;
+      $vars['_signedin'] = false;
     }
     else
     {
-      $vars['signedin'] = true;
-      $vars['username'] = $username;
+      $vars['_signedin'] = true;
+      $vars['_username'] = $username;
     }
     $this->load->vars($vars);
 

@@ -3,7 +3,7 @@
 class Videos_model extends CI_Model {
   public function list_subscriptions()
   {
-    $this->db->select('display, thumbnail, checked, new, later');
+    $this->db->select('username, display, thumbnail, checked, new, later');
     $this->db->join('subscription', 'username=channel');
     $this->db->where('user', $this->session->userdata('username'));
     return $this->db->get('channel');
@@ -11,7 +11,7 @@ class Videos_model extends CI_Model {
 
   public function list_new_subscriptions()
   {
-    $this->db->select('display, thumbnail, checked, new, later');
+    $this->db->select('username, display, thumbnail, checked, new, later');
     $this->db->join('subscription', 'username=channel');
     $this->db->where('user', $this->session->userdata('username'));
     $this->db->where('new >', '0');
@@ -20,7 +20,7 @@ class Videos_model extends CI_Model {
 
   public function list_later_subscriptions()
   {
-    $this->db->select('display, thumbnail, checked, new, later');
+    $this->db->select('username, display, thumbnail, checked, new, later');
     $this->db->join('subscription', 'username=channel');
     $this->db->where('user', $this->session->userdata('username'));
     $this->db->where('later >', '0');
@@ -108,11 +108,11 @@ class Videos_model extends CI_Model {
     return TRUE;
   }
 
-  public function push_video($channel, $video)
+  public function push_video($channel, $users, $video)
   {
-    $users = get_subscribers($channel);
     foreach ($users->result() as $user)
       $this->db->insert('item', array('video' => $video['video'], 'user' => $user->user, 'channel' => $channel));
+    return $users->num_rows();
   }
 
   public function touch_channel($channel)
@@ -127,6 +127,7 @@ class Videos_model extends CI_Model {
     foreach ($updates->result_array() as $row)
     {
       $this->db->where('user', $row['user']);
+      $this->db->where('channel', $channel);
       $this->db->update('subscription', array('new' => $row['count']));
     }
   }

@@ -22,14 +22,14 @@ class Auth extends MY_Controller {
     if ($this->session->userdata('username') !== FALSE)
     {
       // already signed in
-      $this->load->view('header');
+      $this->load->view('header', array('pageName' => 'Register'));
       $this->load->view('register_already');
       $this->load->view('footer');
     }
     else if ($this->form_validation->run() === FALSE)
     {
       // show form
-      $this->load->view('header');
+      $this->load->view('header', array('pageName' => 'Register'));
       $this->load->view('register_form');
       $this->load->view('footer');
     }
@@ -55,19 +55,19 @@ class Auth extends MY_Controller {
     // set validation rules
     $this->form_validation->set_error_delimiters('', '');
     $this->form_validation->set_rules('username', 'Username', 'trim|required|xss_clean');
-    $this->form_validation->set_rules('password', 'Password', 'trim|required|callback_check_credentials');
+    $this->form_validation->set_rules('password', 'Password', 'trim|required|callback__check_credentials');
 
     if ($this->session->userdata('username') !== FALSE)
     {
       // already signed in
-      $this->load->view('header');
+      $this->load->view('header', array('pageName' => 'Sign In'));
       $this->load->view('signin_already');
       $this->load->view('footer');
     }
     else if ($this->form_validation->run() === FALSE)
     {
       // show form
-      $this->load->view('header');
+      $this->load->view('header', array('pageName' => 'Sign In'));
       $this->load->view('signin_form');
       $this->load->view('footer');
     }
@@ -84,7 +84,7 @@ class Auth extends MY_Controller {
   }
 
   // validates username and password combination
-  public function check_credentials($password)
+  function _check_credentials($password)
   {
     require_once('PasswordHash.php');
     $hasher = new PasswordHash(8, FALSE);

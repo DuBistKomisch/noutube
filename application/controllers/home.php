@@ -27,14 +27,14 @@ class Home extends MY_Controller
   // displays privacy statement
   public function privacy()
   {
-    $this->load->view('header');
+    $this->load->view('header', array('pageName' => 'Privacy Statement'));
     $this->load->view('privacy');
     $this->load->view('footer');
   }
 
   public function error404()
   {
-    $this->load->view('header');
+    $this->load->view('header', array('pageName' => '404 Not Found'));
     $this->load->view('404');
     $this->load->view('footer');
   }
