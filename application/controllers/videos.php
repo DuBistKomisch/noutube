@@ -57,50 +57,80 @@ class Videos extends MY_Controller
     if ($this->session->userdata('token') === FALSE)
       redirect('home', 'refresh');
 
-    // fetch data
-    $results_new = $this->videos_model->list_new_subscriptions();
-    $results_later = $this->videos_model->list_later_subscriptions();
+    // form helper
+    $this->load->helper('form');
+
+    // process form
+    if ($this->input->post('new') !== FALSE)
+    {
+      foreach ($this->input->post() as $name => $value)
+        if (strlen($name) == 14)
+          $this->videos_model->watch_video_later(substr($name, 3));
+      $this->videos_model->cull_new_videos();
+    }
+    else if ($this->input->post('later') !== FALSE)
+    {
+      foreach ($this->input->post() as $name => $value)
+        if (strlen($name) == 16)
+          $this->videos_model->watched_video(substr($name, 5));
+      $this->videos_model->cull_watched_videos();
+    }
 
     // show subscriptions
     $this->load->view('header', array('pageName' => 'Video Manager'));
     $this->load->view('videos/videos');
     
-    $this->load->view('videos/new');
+    // new
+    $results_new = $this->videos_model->list_new_subscriptions();
     if ($results_new->num_rows() == 0)
       $this->load->view('videos/new_none');
-    else foreach ($results_new->result_array() as $row)
+    else
     {
-      $row['checked_date'] = self::_date($row['checked']);
-      $row['checked_ago'] = self::_ago($row['checked']);
-      $this->load->view('videos/channel', $row);
-      $videos = $this->videos_model->list_new_videos($row['username']);
-      foreach ($videos->result_array() as $video)
+      $this->load->view('videos/new_start');
+      foreach ($results_new->result_array() as $row)
       {
-        $video['published_date'] = self::_date($video['published']);
-        $video['published_ago'] = self::_ago($video['published']);
-        $video['duration_hms'] = self::_hms($video['duration']);
-        $this->load->view('videos/video', $video);
+        $row['checked_date'] = self::_date($row['checked']);
+        $row['checked_ago'] = self::_ago($row['checked']);
+        $this->load->view('videos/channel', $row);
+        $videos = $this->videos_model->list_new_videos($row['username']);
+        foreach ($videos->result_array() as $video)
+        {
+          $video['published_date'] = self::_date($video['published']);
+          $video['published_ago'] = self::_ago($video['published']);
+          $video['duration_hms'] = self::_hms($video['duration']);
+          $video['form'] = 'new';
+          $this->load->view('videos/video', $video);
+        }
       }
+      $this->load->view('videos/new_end');
     }
 
-    $this->load->view('videos/later');
+    // later
+    $results_later = $this->videos_model->list_later_subscriptions();
     if ($results_later->num_rows() == 0)
       $this->load->view('videos/later_none');
-    else foreach ($results_later->result_array() as $row)
+    else
     {
-      $row['checked_date'] = self::_date($row['checked']);
-      $row['checked_ago'] = self::_ago($row['checked']);
-      $this->load->view('videos/channel', $row);
-      $videos = $this->videos_model->list_later_videos($row['username']);
-      foreach ($videos->result_array() as $video)
+      $this->load->view('videos/later_start');
+      foreach ($results_later->result_array() as $row)
       {
-        $video['published_date'] = self::_date($video['published']);
-        $video['published_ago'] = self::_ago($video['published']);
-        $video['duration_hms'] = self::_hms($video['duration']);
-        $this->load->view('videos/video', $video);
+        $row['checked_date'] = self::_date($row['checked']);
+        $row['checked_ago'] = self::_ago($row['checked']);
+        $this->load->view('videos/channel', $row);
+        $videos = $this->videos_model->list_later_videos($row['username']);
+        foreach ($videos->result_array() as $video)
+        {
+          $video['published_date'] = self::_date($video['published']);
+          $video['published_ago'] = self::_ago($video['published']);
+          $video['duration_hms'] = self::_hms($video['duration']);
+          $video['form'] = 'later';
+          $this->load->view('videos/video', $video);
+        }
       }
+      $this->load->view('videos/later_end');
     }
 
+    // done
     $this->load->view('footer');
   }
 
@@ -120,13 +150,87 @@ class Videos extends MY_Controller
     $this->load->view('videos/all');
     if ($results->num_rows() == 0)
       $this->load->view('videos/all_none');
-    foreach ($results->result_array() as $row)
+    else foreach ($results->result_array() as $row)
     {
       $row['checked_date'] = self::_date($row['checked']);
       $row['checked_ago'] = self::_ago($row['checked']);
       $this->load->view('videos/channel', $row);
     }
 
+    $this->load->view('footer');
+  }
+
+  public function channel($channel)
+  {
+    // redirect if not authenticated
+    if ($this->session->userdata('token') === FALSE)
+      redirect('home', 'refresh');
+
+    $this->load->helper('form');
+
+    // process form
+    if ($this->input->post('new') !== FALSE)
+    {
+      foreach ($this->input->post() as $name => $value)
+        if (strlen($name) == 14)
+          $this->videos_model->watch_video_later(substr($name, 3));
+      $this->videos_model->cull_new_videos($channel);
+    }
+    else if ($this->input->post('later') !== FALSE)
+    {
+      foreach ($this->input->post() as $name => $value)
+        if (strlen($name) == 16)
+          $this->videos_model->watched_video(substr($name, 5));
+      $this->videos_model->cull_watched_videos($channel);
+    }
+
+    // get channel
+    $channel = $this->videos_model->get_channel($channel);
+    $row = $channel->row_array();
+    $row['checked_date'] = self::_date($row['checked']);
+    $row['checked_ago'] = self::_ago($row['checked']);
+
+    $this->load->view('header', array('pageName' => $row['display']));
+    $this->load->view('videos/videos');
+    $this->load->view('videos/channel', $row);
+
+    // new
+    $videos_new = $this->videos_model->list_new_videos($row['username']);
+    if ($videos_new->num_rows() == 0)
+      $this->load->view('videos/channel/new_none');
+    else
+    {
+      $this->load->view('videos/channel/new_start', array('channel' => $row['username']));
+      foreach ($videos_new->result_array() as $video)
+      {
+        $video['published_date'] = self::_date($video['published']);
+        $video['published_ago'] = self::_ago($video['published']);
+        $video['duration_hms'] = self::_hms($video['duration']);
+        $video['form'] = 'new';
+        $this->load->view('videos/video', $video);
+      }
+      $this->load->view('videos/channel/new_end');
+    }
+   
+    // later
+    $videos_later = $this->videos_model->list_later_videos($row['username']);
+    if ($videos_later->num_rows() == 0)
+      $this->load->view('videos/channel/later_none');
+    else
+    {
+      $this->load->view('videos/channel/later_start', array('channel' => $row['username']));
+      foreach ($videos_later->result_array() as $video)
+      {
+        $video['published_date'] = self::_date($video['published']);
+        $video['published_ago'] = self::_ago($video['published']);
+        $video['duration_hms'] = self::_hms($video['duration']);
+        $video['form'] = 'later';
+        $this->load->view('videos/video', $video);
+      }
+      $this->load->view('videos/channel/later_end');
+    }
+
+    // done
     $this->load->view('footer');
   }
 
@@ -236,6 +340,9 @@ class Videos extends MY_Controller
             'duration' => (int)$entry->mediaGroup->duration->seconds,
             'channel' => $channel->username
           );
+          // don't add old videos
+          if ($video['published'] < $channel->checked)
+            continue;
           // insert or update
           if ($this->videos_model->put_video($video))
           {

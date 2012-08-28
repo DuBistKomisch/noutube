@@ -1,6 +1,43 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Videos_model extends CI_Model {
+  // forms
+
+  public function watch_video_later($video)
+  {
+    $this->db->query('UPDATE item JOIN subscription ON item.channel=subscription.channel AND item.user=subscription.user SET state=1, new=new-1, later=later+1 WHERE video=\'' . $video . '\' AND item.user=\'' . $this->session->userdata('username') . '\'');
+  }
+
+  public function cull_new_videos($channel = NULL)
+  {
+    $this->db->where('state', 0);
+    $this->db->where('user', $this->session->userdata('username'));
+    if ($channel !== NULL)
+      $this->db->where('channel', $channel);
+    $this->db->delete('item');
+    $this->db->where('user', $this->session->userdata('username'));
+    if ($channel !== NULL)
+      $this->db->where('channel', $channel);
+    $this->db->set('new', 0);
+    $this->db->update('subscription');
+  }
+
+  public function watched_video($video)
+  {
+    $this->db->query('UPDATE item JOIN subscription ON item.channel=subscription.channel AND item.user=subscription.user SET state=2, later=later-1 WHERE video=\'' . $video . '\' AND item.user=\'' . $this->session->userdata('username') . '\'');
+  }
+
+  public function cull_watched_videos($channel = NULL)
+  {
+    $this->db->where('state', 2);
+    $this->db->where('user', $this->session->userdata('username'));
+    if ($channel !== NULL)
+      $this->db->where('channel', $channel);
+    $this->db->delete('item');
+  }
+
+  // lists
+ 
   public function list_subscriptions()
   {
     $this->db->select('username, display, thumbnail, checked, new, later');
@@ -47,6 +84,17 @@ class Videos_model extends CI_Model {
     $this->db->where('item.state', 1);
     $this->db->order_by('video.published', 'desc');
     return $this->db->get('video');
+  }
+
+  // channel
+
+  public function get_channel($channel)
+  {
+    $this->db->select('username, display, thumbnail, checked, new, later');
+    $this->db->join('subscription', 'username=channel');
+    $this->db->where('user', $this->session->userdata('username'));
+    $this->db->where('username', $channel);
+    return $this->db->get('channel');
   }
 
   // update
@@ -107,7 +155,7 @@ class Videos_model extends CI_Model {
 
   public function get_channels()
   {
-    return $this->db->query('SELECT username, (SELECT COUNT(*) FROM video WHERE channel=username) AS videos FROM channel');
+    return $this->db->query('SELECT username, checked, (SELECT COUNT(*) FROM video WHERE channel=username) AS videos FROM channel');
   }
 
   public function get_subscribers($channel)
