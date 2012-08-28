@@ -18,6 +18,17 @@ class Videos_model extends CI_Model {
     return $this->db->get('channel');
   }
 
+  public function list_new_videos($channel)
+  {
+    $this->db->select('video.video, video.title, video.duration, video.published');
+    $this->db->join('item', 'video.video=item.video');
+    $this->db->where('video.channel', $channel);
+    $this->db->where('item.user', $this->session->userdata('username'));
+    $this->db->where('item.state', 0);
+    $this->db->order_by('video.published', 'desc');
+    return $this->db->get('video');
+  }
+
   public function list_later_subscriptions()
   {
     $this->db->select('username, display, thumbnail, checked, new, later');
@@ -25,6 +36,17 @@ class Videos_model extends CI_Model {
     $this->db->where('user', $this->session->userdata('username'));
     $this->db->where('later >', '0');
     return $this->db->get('channel');
+  }
+
+  public function list_later_videos($channel)
+  {
+    $this->db->select('video.video, video.title, video.duration, video.published');
+    $this->db->join('item', 'video.video=item.video');
+    $this->db->where('video.channel', $channel);
+    $this->db->where('item.user', $this->session->userdata('username'));
+    $this->db->where('item.state', 1);
+    $this->db->order_by('video.published', 'desc');
+    return $this->db->get('video');
   }
 
   // update
@@ -54,7 +76,7 @@ class Videos_model extends CI_Model {
     ));
   }
 
-  public function ubsubscribe($channel)
+  public function unsubscribe($channel)
   {
     // remove subscription
     $this->db->where('user', $this->session->userdata('username'));
@@ -85,8 +107,7 @@ class Videos_model extends CI_Model {
 
   public function get_channels()
   {
-    $this->db->select('username');
-    return $this->db->get('channel');
+    return $this->db->query('SELECT username, (SELECT COUNT(*) FROM video WHERE channel=username) AS videos FROM channel');
   }
 
   public function get_subscribers($channel)

@@ -87,7 +87,6 @@ h2
 
 .subscription
 {
-  display: block;
   margin: 8px;
 
   border-radius: 8px;
@@ -111,18 +110,34 @@ h2
   height: 44px;
 }
 
+.video img
+{
+  display: inline-block;
+  vertical-align: middle;
+  margin: 4px;
+  width: 60px;
+  height: 45px;
+}
+
 .subright
 {
   display: inline-block;
   vertical-align: middle;
 }
 
-.subscription p
+.subscription p, .video p
 {
   margin: 4px 0px;
 }
 
 .update
 {
-  font-size: x-small;
+  font-size: small;
+}
+
+.desc
+{
+  font-size: small;
+  max-height: 5em;
+  overflow: auto;
 }

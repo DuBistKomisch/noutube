@@ -9,6 +9,48 @@ class Videos extends MY_Controller
     $this->load->model('videos_model');
   }
 
+  public function _plural($base, $n, $singular = '', $plural = 's')
+  {
+    return $base . ($n == 1 ? $singular : $plural);
+  }
+
+  public function _date($time)
+  {
+    return date('Y-m-d H:i:s \U\T\CP', $time);
+  }
+
+  public function _hms($time)
+  {
+    $result = '';
+    if ($time > 3600)
+      $result .= sprintf('%d:%02d:%02d', $time / 3600, $time / 60 % 60, $time % 60);
+    else
+      $result .= sprintf('%d:%02d', $time / 60 % 60, $time % 60);
+    return $result;
+  }
+
+  public function _ago($time)
+  {
+    $span = time() - $time;
+    $years   = floor($span / (365 * 24 * 60 * 60));    $span -= $years   * (365 * 24 * 60 * 60);
+    $months  = floor($span / (365/12 * 24 * 60 * 60)); $span -= $months  * (365/12 * 24 * 60 * 60);
+    $weeks   = floor($span / (7 * 24 * 60 * 60));      $span -= $weeks   * (7 * 24 * 60 * 60);
+    $days    = floor($span / (24 * 60 * 60));          $span -= $days    * (24 * 60 * 60);
+    $hours   = floor($span / (60 * 60));               $span -= $hours   * (60 * 60);
+    $minutes = floor($span / (60));                    $span -= $minutes * (60);
+    $seconds = $span;
+
+    if      ($years > 0)   $data = array('v1' => $years, 's1' => 'year', 'v2' => $months, 's2' => 'month');
+    else if ($months > 0)  $data = array('v1' => $months, 's1' => 'month', 'v2' => $weeks, 's2' => 'week');
+    else if ($weeks > 0)   $data = array('v1' => $weeks, 's1' => 'week', 'v2' => $days, 's2' => 'day');
+    else if ($days > 0)    $data = array('v1' => $days, 's1' => 'day', 'v2' => $hours, 's2' => 'hour');
+    else if ($hours > 0)   $data = array('v1' => $hours, 's1' => 'hour', 'v2' => $minutes, 's2' => 'minute');
+    else if ($minutes > 0) $data = array('v1' => $minutes, 's1' => 'minute', 'v2' => $seconds, 's2' => 'second');
+    else                   $data = array('v1' => $seconds, 's1' => 'second', 'v2' => 0, 's2' => '');
+
+    return $data['v1'] . ' ' . self::_plural($data['s1'], $data['v1']) . ($data['v2'] > 0 ? ' and ' . $data['v2'] . ' ' . self::_plural($data['s2'], $data['v2']) : '');
+  }
+
   public function index()
   {
     // redirect if not authenticated
@@ -27,13 +69,37 @@ class Videos extends MY_Controller
     if ($results_new->num_rows() == 0)
       $this->load->view('videos/new_none');
     else foreach ($results_new->result_array() as $row)
+    {
+      $row['checked_date'] = self::_date($row['checked']);
+      $row['checked_ago'] = self::_ago($row['checked']);
       $this->load->view('videos/channel', $row);
+      $videos = $this->videos_model->list_new_videos($row['username']);
+      foreach ($videos->result_array() as $video)
+      {
+        $video['published_date'] = self::_date($video['published']);
+        $video['published_ago'] = self::_ago($video['published']);
+        $video['duration_hms'] = self::_hms($video['duration']);
+        $this->load->view('videos/video', $video);
+      }
+    }
 
     $this->load->view('videos/later');
     if ($results_later->num_rows() == 0)
       $this->load->view('videos/later_none');
     else foreach ($results_later->result_array() as $row)
+    {
+      $row['checked_date'] = self::_date($row['checked']);
+      $row['checked_ago'] = self::_ago($row['checked']);
       $this->load->view('videos/channel', $row);
+      $videos = $this->videos_model->list_later_videos($row['username']);
+      foreach ($videos->result_array() as $video)
+      {
+        $video['published_date'] = self::_date($video['published']);
+        $video['published_ago'] = self::_ago($video['published']);
+        $video['duration_hms'] = self::_hms($video['duration']);
+        $this->load->view('videos/video', $video);
+      }
+    }
 
     $this->load->view('footer');
   }
@@ -55,7 +121,11 @@ class Videos extends MY_Controller
     if ($results->num_rows() == 0)
       $this->load->view('videos/all_none');
     foreach ($results->result_array() as $row)
+    {
+      $row['checked_date'] = self::_date($row['checked']);
+      $row['checked_ago'] = self::_ago($row['checked']);
       $this->load->view('videos/channel', $row);
+    }
 
     $this->load->view('footer');
   }
@@ -123,6 +193,7 @@ class Videos extends MY_Controller
 
     // output
     $this->load->view('header', array('pageName' => 'Update Subscriptions'));
+    $this->load->view('videos/videos');
     $this->load->view('videos/update', array('added' => $added, 'removed' => $removed));
     $this->load->view('footer');
   }
@@ -140,7 +211,7 @@ class Videos extends MY_Controller
     // open log file
     $log = fopen('poll.log', 'a');
     if ($log !== FALSE)
-      fwrite($log, 'poll started at ' . date('Y-m-d H:i:s P') . PHP_EOL);
+      fwrite($log, 'poll started at ' . self::_date(time()) . PHP_EOL);
 
     // get list of channels
     $channels = $this->videos_model->get_channels();
@@ -149,36 +220,46 @@ class Videos extends MY_Controller
     foreach ($channels->result() as $channel)
     {
       // fetch recent uploads
-      $added = 0;
-      $uploads = $this->yt->getUserUploads(NULL, 'https://gdata.youtube.com/feeds/mobile/users/' . $channel->username . '/uploads?max-results=5');
+      $uploads = $this->yt->getUserUploads(NULL, 'https://gdata.youtube.com/feeds/mobile/users/' . $channel->username . '/uploads?max-results=2');
       $subscribers = $this->videos_model->get_subscribers($channel->username);
-      foreach ($uploads->entry as $entry)
+      $added_total = 0;
+      while ($uploads !== NULL)
       {
-        // construct video
-        $video = array(
-          'video' => $entry->mediaGroup->videoid->text,
-          'title' => $entry->mediaGroup->title->text,
-          'published' => strtotime($entry->published->text),
-          'duration' => (int)$entry->mediaGroup->duration->seconds,
-          'description' => $entry->mediaGroup->description->text,
-          'channel' => $channel->username
-        );
-        // insert or update
-        if ($this->videos_model->put_video($video))
+        $added = 0;
+        foreach ($uploads->entry as $entry)
         {
-          // inserted, give all subscribers an item for it
-          $added++;
-          $this->videos_model->push_video($channel->username, $subscribers, $video);
+          // construct video
+          $video = array(
+            'video' => $entry->mediaGroup->videoid->text,
+            'title' => $entry->mediaGroup->title->text,
+            'published' => strtotime($entry->published->text),
+            'duration' => (int)$entry->mediaGroup->duration->seconds,
+            'channel' => $channel->username
+          );
+          // insert or update
+          if ($this->videos_model->put_video($video))
+          {
+            // inserted, give all subscribers an item for it
+            $added++;
+            $this->videos_model->push_video($channel->username, $subscribers, $video);
+          }
         }
+        // pagination
+        $next = $uploads->getNextLink();
+        if ($next === NULL || $added < 2 || $channel->videos == 0)
+          $uploads = NULL;
+        else
+          $uploads = $this->yt->getUserUploads(NULL, $next->href);
+        // update total added
+        $added_total += $added;
       }
       // update last checked time for subscription
       $this->videos_model->touch_channel($channel->username);
       // update 'new' counts if any were added
       if ($log !== FALSE)
-        fwrite($log, $added . ' new videos found for ' . $channel->username . ' for ' . $subscribers->num_rows() . ' users ' . PHP_EOL);
-      if ($added == 0)
-        continue;
-      $this->videos_model->update_new($channel->username);
+        fwrite($log, $added_total . ' new videos found for ' . $channel->username . ' for ' . $subscribers->num_rows() . ' users ' . PHP_EOL);
+      if ($added_total > 0)
+        $this->videos_model->update_new($channel->username);
     }
 
     // remove redundant videos
@@ -187,7 +268,7 @@ class Videos extends MY_Controller
     // done
     if ($log !== FALSE)
     {
-      fwrite($log, 'poll finished at ' . date('Y-m-d H:i:s P') . PHP_EOL);
+      fwrite($log, 'poll finished at ' . self::_date(time()) . PHP_EOL);
       fclose($log);
     }
   }
