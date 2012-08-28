@@ -1,4 +1,4 @@
-<div class="subscription">
+<div class="channel">
   <img src="<?php echo $thumbnail; ?>" alt="<?php echo $display; ?> thumbnail">
   <div class="subright">
     <p><?php echo anchor('videos/channel/' . $username, $display); ?> &mdash; <?php echo $new; ?> new, <?php echo $later; ?> to watch later</p>

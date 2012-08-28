@@ -66,7 +66,6 @@ subscription
 video
  - video, char(11), primary
  - title, text
- - description, text
  - duration, int
  - published, int
  - channel, varchar(100)

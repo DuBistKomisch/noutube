@@ -85,7 +85,7 @@ h2
 
 /* subscriptions */
 
-.subscription
+.channel
 {
   margin: 8px;
 
@@ -101,7 +101,7 @@ h2
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f6f8', endColorstr='#e0eff9',GradientType=0 ); /* IE6-9 */
 }
 
-.subscription img
+.channel img
 {
   display: inline-block;
   vertical-align: middle;
@@ -125,7 +125,7 @@ h2
   vertical-align: middle;
 }
 
-.subscription p, .video p
+.channel p, .video p
 {
   margin: 4px 0px;
 }
@@ -133,11 +133,4 @@ h2
 .update
 {
   font-size: small;
-}
-
-.desc
-{
-  font-size: small;
-  max-height: 5em;
-  overflow: auto;
 }
