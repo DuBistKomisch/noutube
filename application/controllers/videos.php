@@ -55,7 +55,10 @@ class Videos extends MY_Controller
   {
     // redirect if not authenticated
     if ($this->session->userdata('token') === FALSE)
+    {
       redirect('home', 'refresh');
+      return;
+    }
 
     // form helper
     $this->load->helper('form');
@@ -67,6 +70,8 @@ class Videos extends MY_Controller
         if (strlen($name) == 14)
           $this->videos_model->watch_video_later(substr($name, 3));
       $this->videos_model->cull_new_videos();
+      redirect('videos', 'refresh');
+      return;
     }
     else if ($this->input->post('later') !== FALSE)
     {
@@ -74,6 +79,8 @@ class Videos extends MY_Controller
         if (strlen($name) == 16)
           $this->videos_model->watched_video(substr($name, 5));
       $this->videos_model->cull_watched_videos();
+      redirect('videos', 'refresh');
+      return;
     }
 
     // show subscriptions
@@ -138,7 +145,10 @@ class Videos extends MY_Controller
   {
     // redirect if not authenticated
     if ($this->session->userdata('token') === FALSE)
+    {
       redirect('home', 'refresh');
+      return;
+    }
 
     // fetch data
     $results = $this->videos_model->list_subscriptions();
@@ -164,7 +174,10 @@ class Videos extends MY_Controller
   {
     // redirect if not authenticated
     if ($this->session->userdata('token') === FALSE)
+    {
       redirect('home', 'refresh');
+      return;
+    }
 
     $this->load->helper('form');
 
@@ -175,6 +188,8 @@ class Videos extends MY_Controller
         if (strlen($name) == 14)
           $this->videos_model->watch_video_later(substr($name, 3));
       $this->videos_model->cull_new_videos($channel);
+      redirect('videos/channel/' . $channel, 'refresh');
+      return;
     }
     else if ($this->input->post('later') !== FALSE)
     {
@@ -182,6 +197,8 @@ class Videos extends MY_Controller
         if (strlen($name) == 16)
           $this->videos_model->watched_video(substr($name, 5));
       $this->videos_model->cull_watched_videos($channel);
+      redirect('videos/channel/' . $channel, 'refresh');
+      return;
     }
 
     // get channel
@@ -239,7 +256,10 @@ class Videos extends MY_Controller
   {
     // redirect if not authenticated
     if ($this->session->userdata('token') === FALSE)
+    {
       redirect('home', 'refresh');
+      return;
+    }
 
     // counters
     $added = 0;

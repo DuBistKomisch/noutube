@@ -10,11 +10,13 @@ class Home extends MY_Controller
     {
       // fully authenticated
       redirect('videos', 'refresh');
+      return;
     }
     else if ($this->session->userdata('username') !== FALSE)
     {
       // need token
       redirect('auth/token', 'refresh');
+      return;
     }
     else
     {
