@@ -282,7 +282,8 @@ class Videos extends MY_Controller
           'username' => $entry->username->text,
           'display' => $entry->username->extensionAttributes['display']['value'],
           'thumbnail' => $entry->mediaThumbnail->url,
-          'updated' => time()
+          'updated' => time(),
+          'checked' => time()
         );
         // insert or update
         $this->videos_model->put_channel($channel);
@@ -344,7 +345,14 @@ class Videos extends MY_Controller
     foreach ($channels->result() as $channel)
     {
       // fetch recent uploads
-      $uploads = $this->yt->getUserUploads(NULL, 'https://gdata.youtube.com/feeds/mobile/users/' . $channel->username . '/uploads?max-results=2');
+      try
+      {
+        $uploads = $this->yt->getUserUploads(NULL, 'https://gdata.youtube.com/feeds/mobile/users/' . $channel->username . '/uploads?max-results=2');
+      }
+      catch (Exception $e)
+      {
+        continue;
+      }
       $subscribers = $this->videos_model->get_subscribers($channel->username);
       $added_total = 0;
       while ($uploads !== NULL)
@@ -376,7 +384,14 @@ class Videos extends MY_Controller
         if ($next === NULL || $added < 2 || $channel->videos == 0)
           $uploads = NULL;
         else
-          $uploads = $this->yt->getUserUploads(NULL, $next->href);
+          try
+          {
+            $uploads = $this->yt->getUserUploads(NULL, $next->href);
+          }
+          catch (Exception $e)
+          {
+            break;
+          }
         // update total added
         $added_total += $added;
       }

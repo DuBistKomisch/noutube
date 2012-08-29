@@ -111,8 +111,8 @@ class Videos_model extends CI_Model {
     $this->db->insert('channel', $channel);
     if ($this->db->_error_number() !== 0)
     {
-      $this->db->where('username', $channel['username']);
-      $this->db->update('channel', $channel);
+    //  $this->db->where('username', $channel['username']);
+    //  $this->db->update('channel', $channel);
     }
   }
 
