@@ -11,7 +11,7 @@ class MY_Controller extends CI_Controller
     // take session data into global variables for views
     $vars = array();
     $vars['applicationName'] = $this->config->item('applicationName');
-    $username = $this->session->userdata('username');
+    $username = $this->session->userdata('display');
     if ($username === FALSE)
     {
       $vars['_signedin'] = false;

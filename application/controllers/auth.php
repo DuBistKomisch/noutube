@@ -15,7 +15,7 @@ class Auth extends MY_Controller {
 
     // set validation rules
     $this->form_validation->set_error_delimiters('', '');
-    $this->form_validation->set_rules('username', 'Username', 'trim|required|min_length[3]|max_length[16]|is_unique[user.username]|xss_clean');
+    $this->form_validation->set_rules('username', 'Username', 'trim|required|min_length[3]|max_length[16]|callback__check_unique_username|xss_clean');
     $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[8]');
     $this->form_validation->set_rules('password_verify', 'Verify', 'trim|required|matches[password]');
 
@@ -40,10 +40,18 @@ class Auth extends MY_Controller {
       $hasher = new PasswordHash(8, FALSE);
 
       $this->auth_model->insert_user($hasher->HashPassword($this->input->post('password')));
-      $this->session->set_userdata('username', $this->input->post('username'));
+      $this->session->set_userdata('username', strtolower($this->input->post('username')));
+      $this->session->set_userdata('display', $this->input->post('username'));
 
       redirect('home', 'refresh');
     }
+  }
+
+  // validate that a username doesn't already exist
+  function _check_unique_username($username)
+  {
+    $this->form_validation->set_message('_check_unique_username', 'Username is already taken.');
+    return !($this->auth_model->does_user_exist($username));
   }
 
   // allow a registered user to sign in to a session
@@ -74,7 +82,8 @@ class Auth extends MY_Controller {
     else
     {
       // success, store username and token in session data
-      $this->session->set_userdata('username', $this->input->post('username'));
+      $this->session->set_userdata('username', strtolower($this->input->post('username')));
+      $this->session->set_userdata('display', $this->auth_model->get_user_display());
       $token = $this->auth_model->get_user_token();
       if ($token !== NULL)
         $this->session->set_userdata('token', $token);
@@ -96,7 +105,7 @@ class Auth extends MY_Controller {
     }
     else
     {
-      $this->form_validation->set_message('check_credentials', 'Username and Password don\'t match.');
+      $this->form_validation->set_message('_check_credentials', 'Username and Password don\'t match.');
       return FALSE;
     }
   }

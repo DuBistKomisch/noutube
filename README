@@ -49,6 +49,7 @@ user
  - username, varchar(16), primary
  - hash, char(60)
  - token, text
+ - display, varchar(16)
 
 channel
  - username, varchar(100), primary
