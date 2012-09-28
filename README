@@ -24,7 +24,7 @@ You'll need to modify these variables in application/config/config.php to get st
  - $config['base_url']
  - $config['index_page'] (if using mod_rewrite, which is not necessary)
  - $config['encryption_key'] and $config['sess_secure'] (if using secure sessions, which is not necessary)
- - $config['sess_user_database'] (if storing sessions in a database, which is not necessary)
+ - $config['sess_user_database'] and other session-related config variables
  - $config['cookie_domain'] and $['cookie_path']
 
 You'll also need to add a few of your own to the end of the file:
@@ -41,7 +41,7 @@ Which is the name to use to brand the site.
 Database
 --------
 
-Next you'll need to set up a database. Any DBMS supported by CodeIgniter should work.
+Next you'll need to set up a database. Any DBMS supported by CodeIgniter should work, but only MySQL is tested.
 
 Create the following tables:
 

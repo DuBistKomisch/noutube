@@ -341,7 +341,7 @@ class Videos extends MY_Controller
     // get list of channels
     $channels = $this->videos_model->get_channels();
     if ($log !== NULL)
-      fwrite($log, 'got ' . $channels->num_rows() . ' channels' . PHP_EOL);
+      fwrite($log, 'found ' . $channels->num_rows() . ' channels' . PHP_EOL);
     foreach ($channels->result() as $channel)
     {
       // fetch recent uploads
@@ -398,14 +398,22 @@ class Videos extends MY_Controller
       // update last checked time for subscription
       $this->videos_model->touch_channel($channel->username);
       // update 'new' counts if any were added
-      if ($log !== FALSE)
+      if ($log !== FALSE && $added_total > 0)
         fwrite($log, $added_total . ' new videos found for ' . $channel->username . ' for ' . $subscribers->num_rows() . ' users ' . PHP_EOL);
       if ($added_total > 0)
         $this->videos_model->update_new($channel->username);
     }
 
     // remove redundant videos
+    if ($log !== NULL)
+      fwrite($log, 'culling new items older than a week...' . PHP_EOL);
+    $this->videos_model->cull_items();
+    if ($log !== NULL)
+      fwrite($log, 'culling videos without any items...' . PHP_EOL);
     $this->videos_model->cull_videos();
+    if ($log !== NULL)
+      fwrite($log, 'culling old sessions...' . PHP_EOL);
+    $this->videos_model->cull_sessions();
 
     // done
     if ($log !== FALSE)

@@ -201,6 +201,11 @@ class Videos_model extends CI_Model {
     }
   }
 
+  public function cull_items()
+  {
+    $this->db->query('DELETE FROM item WHERE item.state=0 AND (SELECT video.published FROM video WHERE video.video = item.video)<unix_timestamp()-3600*24*7');
+  }
+
   public function cull_videos()
   {
     $results = $this->db->query('SELECT DISTINCT video.video FROM video LEFT JOIN item ON video.video=item.video WHERE item.video IS NULL;');
@@ -209,5 +214,10 @@ class Videos_model extends CI_Model {
       $this->db->where('video', $row->video);
       $this->db->delete('video');
     }
+  }
+
+  public function cull_sessions()
+  {
+    $this->db->query('DELETE FROM ci_sessions WHERE last_activity<unix_timestamp()-3600*7*24');
   }
 }
