@@ -93,7 +93,7 @@ class Videos extends MY_Controller
       $this->load->view('videos/new_none');
     else
     {
-      $this->load->view('videos/new_start');
+      $this->load->view('videos/new_start', array('total' => $this->videos_model->get_new_count()));
       foreach ($results_new->result_array() as $row)
       {
         $row['checked_date'] = self::_date($row['checked']);
@@ -118,7 +118,7 @@ class Videos extends MY_Controller
       $this->load->view('videos/later_none');
     else
     {
-      $this->load->view('videos/later_start');
+      $this->load->view('videos/later_start', array('total' => $this->videos_model->get_later_count()));
       foreach ($results_later->result_array() as $row)
       {
         $row['checked_date'] = self::_date($row['checked']);
@@ -217,7 +217,7 @@ class Videos extends MY_Controller
       $this->load->view('videos/channel/new_none');
     else
     {
-      $this->load->view('videos/channel/new_start', array('channel' => $row['username']));
+      $this->load->view('videos/channel/new_start', array('channel' => $row['username'], 'total' => $row['new']));
       foreach ($videos_new->result_array() as $video)
       {
         $video['published_date'] = self::_date($video['published']);
@@ -235,7 +235,7 @@ class Videos extends MY_Controller
       $this->load->view('videos/channel/later_none');
     else
     {
-      $this->load->view('videos/channel/later_start', array('channel' => $row['username']));
+      $this->load->view('videos/channel/later_start', array('channel' => $row['username'], 'total' => $row['later']));
       foreach ($videos_later->result_array() as $video)
       {
         $video['published_date'] = self::_date($video['published']);

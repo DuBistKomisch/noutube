@@ -37,6 +37,20 @@ class Videos_model extends CI_Model {
   }
 
   // lists
+
+  public function get_new_count()
+  {
+    $this->db->select('SUM(new) AS count');
+    $this->db->where('user', $this->session->userdata('username'));
+    return $this->db->get('subscription')->row()->count;
+  }
+ 
+  public function get_later_count()
+  {
+    $this->db->select('SUM(later) AS count');
+    $this->db->where('user', $this->session->userdata('username'));
+    return $this->db->get('subscription')->row()->count;
+  }
  
   public function list_subscriptions()
   {
