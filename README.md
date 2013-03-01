@@ -23,24 +23,24 @@ Config
 You'll need to modify these variables in application/config/config.php to get started:
 
  - `$config['base_url']`
-     your domain and subdirectory with trailing slash
+   - your domain and subdirectory with trailing slash
  - `$config['index_page']`
-     (optional) set to '' if using rewrite
+   - (optional) set to '' if using rewrite
  - `$config['encryption_key']` and `$config['sess_secure']`
-     (optional) add a key if you want to secure your sessions
+   - (optional) add a key if you want to secure your sessions
  - `$config['sess_user_database']` and other session-related config variables
-     (optional) enable if you want to store sessions in your database (see below)
+   - (optional) enable if you want to store sessions in your database (see below)
  - `$config['cookie_domain']` and `$['cookie_path']`
-     set to match the respective parts of your `$config['base_url']`
+   - set to match the respective parts of your `$config['base_url']`
 
 You'll also need to add a few of your own to the end of the file:
 
  - `$config['applicationID']`
-     I think this is actually ignored by the API now
+   - I think this is actually ignored by the API now
  - `$config['developerKey']`
-     obtained by going to [the YouTube API Dashboard](http://code.google.com/apis/youtube/dashboard)
+   - obtained by going to [the YouTube API Dashboard](http://code.google.com/apis/youtube/dashboard)
  - `$config['applicationName']`
-     the name to use to brand the site
+   - the name to use to brand the site
 
 Database
 --------
