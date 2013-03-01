@@ -1,0 +1,3 @@
+- Turn remaining MySQL queries into CodeIgniter Database class calls
+- Add importable database structure
+- Don't prefix resources with index.php/ when not using rewrite
