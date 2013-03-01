@@ -1,2 +1,1 @@
-- Turn remaining MySQL queries into CodeIgniter Database class calls
-- Add importable database structure
+- Add support for more databases by turning remaining MySQL queries into CodeIgniter Database class calls

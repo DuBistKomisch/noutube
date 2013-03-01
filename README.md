@@ -36,50 +36,20 @@ You'll also need to add a few of your own to the end of the file:
  - `$config['applicationID']`
    - I think this is actually ignored by the API now
  - `$config['developerKey']`
-   - obtained by going to [the YouTube API Dashboard](http://code.google.com/apis/youtube/dashboard)
+   - obtained by going to the [YouTube API Dashboard](http://code.google.com/apis/youtube/dashboard)
  - `$config['applicationName']`
    - the name to use to brand the site
 
 Database
 --------
 
-Next you'll need to set up a database. Only MySQL is tested and probably works, since I used a few hacky queries.
+Only MySQL is tested and probably works, since I used a few hacky queries.
 
-Create the following tables:
+Create a database and import the structure from the file `db.sql`. You should end up with 5 tables.
 
-user
- - username, varchar(16), primary
- - hash, char(60)
- - token, text
- - display, varchar(16)
+Create a user for the database and give them permissions needed to read and write rows.
 
-channel
- - username, varchar(100), primary
- - display, varchar(100)
- - thumbnail, varchar(100)
- - updated, int
- - checked, int, default 0
-
-subscription
- - user, varchar(16), primary
- - channel, varchar(100), primary
- - new, int, default 0
- - later, int, default 0
-
-video
- - video, char(11), primary
- - title, text
- - duration, int
- - published, int
- - channel, varchar(100)
-
-item
- - user, varchar(16), primary
- - video, char(11), primary
- - channel, varchar(100)
- - state, int, default 0
-
-Create a user for the database and add the details to `application/config/database.php`. Be sure to set database debugging to `FALSE`.
+Add the connection details to `application/config/database.php`. Be sure to set database debugging to `FALSE`.
 
 If you want to store session data in a database too, refer to the [CodeIgniter Sessions documentation](http://ellislab.com/codeigniter/user-guide/libraries/sessions.html).
 
