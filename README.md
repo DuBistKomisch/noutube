@@ -25,15 +25,15 @@ Config
 
 You'll need to modify these variables in application/config/config.php to get started:
 
- - $config['base_url']
+ - $config['base\_url']
      your domain and subdirectory with trailing slash
- - $config['index_page']
+ - $config['index\_page']
      (optional) set to '' if using rewrite
- - $config['encryption_key'] and $config['sess_secure']
+ - $config['encryption\_key'] and $config['sess\_secure']
      (optional) add a key if you want to secure your sessions
- - $config['sess_user_database'] and other session-related config variables
+ - $config['sess\_user\_database'] and other session-related config variables
      (optional) enable if you want to store sessions in your database (see below)
- - $config['cookie_domain'] and $['cookie_path']
+ - $config['cookie\_domain'] and $['cookie\_path']
      set to match the respective parts of your base_url
 
 You'll also need to add a few of your own to the end of the file:
@@ -84,7 +84,7 @@ item
  - channel, varchar(100)
  - state, int, default 0
 
-Lastly you'll need to add the database connection details to application/config/database.php. Be sure to set database debugging to FALSE.
+Create a user for the database and all the details to application/config/database.php. Be sure to set database debugging to FALSE.
 
 If you want to store session data in a database too, refer to the [CodeIgniter Sessions documentation](http://ellislab.com/codeigniter/user-guide/libraries/sessions.html).
 
