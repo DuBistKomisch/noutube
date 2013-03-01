@@ -38,7 +38,7 @@ class Auth_model extends CI_Model {
     $this->db->select('hash');
     $this->db->where('username', strtolower($this->input->post('username')));
     $query = $this->db->get('user');
-    return $query->row()->hash;
+    return $query->num_rows() > 0 ? $query->row()->hash : NULL;
   }
 
   public function set_user_token ()

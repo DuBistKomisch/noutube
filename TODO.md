@@ -1,4 +1,2 @@
 - Turn remaining MySQL queries into CodeIgniter Database class calls
 - Add importable database structure
-- Don't prefix resources with `index.php/` when not using rewrite
-- Fix bug when logging in as non-existant user `models/auth_model.php:41`
