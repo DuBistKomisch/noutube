@@ -11,7 +11,11 @@ Requirements
 ============
 
  - PHP 5.2.x or higher
- - Apache2 mod_rewrite for URLs without "index.php"
+ - A web server
+   - (optional) rewrite functionality
+       (apache, nginx, etc.)
+ - A database server
+     (mysql, etc.)
 
 Installation
 ============
@@ -22,26 +26,29 @@ Config
 You'll need to modify these variables in application/config/config.php to get started:
 
  - $config['base_url']
- - $config['index_page'] (if using mod_rewrite, which is not necessary)
- - $config['encryption_key'] and $config['sess_secure'] (if using secure sessions, which is not necessary)
+     your domain and subdirectory with trailing slash
+ - $config['index_page']
+     (optional) set to '' if using rewrite
+ - $config['encryption_key'] and $config['sess_secure']
+     (optional) add a key if you want to secure your sessions
  - $config['sess_user_database'] and other session-related config variables
+     (optional) enable if you want to store sessions in your database (see below)
  - $config['cookie_domain'] and $['cookie_path']
+     set to match the respective parts of your base_url
 
 You'll also need to add a few of your own to the end of the file:
 
  - $config['applicationID']
+     I think this is actually ignored by the API now
  - $config['developerKey']
-
-Both of which can be obtained by going to http://code.google.com/apis/youtube/dashboard, and finally:
-
+     obtained by going to [the YouTube API Dashboard](http://code.google.com/apis/youtube/dashboard)
  - $config['applicationName']
-
-Which is the name to use to brand the site.
+     the name to use to brand the site
 
 Database
 --------
 
-Next you'll need to set up a database. Any DBMS supported by CodeIgniter should work, but only MySQL is tested.
+Next you'll need to set up a database. Only MySQL is tested and probably works, since I used a few hacky queries.
 
 Create the following tables:
 
@@ -75,11 +82,11 @@ item
  - user, varchar(16), primary
  - video, char(11), primary
  - channel, varchar(100)
- - state, int
+ - state, int, default 0
 
 Lastly you'll need to add the database connection details to application/config/database.php. Be sure to set database debugging to FALSE.
 
-If you want to store session data in a database too, refer to the CodeIgniter Sessions documentation.
+If you want to store session data in a database too, refer to the [CodeIgniter Sessions documentation](http://ellislab.com/codeigniter/user-guide/libraries/sessions.html).
 
 Cron
 ----
