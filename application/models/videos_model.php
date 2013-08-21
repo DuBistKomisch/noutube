@@ -100,17 +100,6 @@ class Videos_model extends CI_Model {
     return $this->db->get('video');
   }
 
-  // channel
-
-  public function get_channel($channel)
-  {
-    $this->db->select('username, display, thumbnail, checked, new, later');
-    $this->db->join('subscription', 'username=channel');
-    $this->db->where('user', $this->session->userdata('username'));
-    $this->db->where('username', $channel);
-    return $this->db->get('channel');
-  }
-
   // update
 
   public function get_subscriptions()
