@@ -84,7 +84,11 @@ class Videos extends MY_Controller
     }
 
     // show subscriptions
-    $this->load->view('header', array('pageName' => 'Video Manager'));
+    $pageInfo = array('pageName' => 'Video Manager');
+    $newCount = $this->videos_model->get_new_count();
+    if ($newCount > 0)
+      $pageInfo['status'] = $newCount;
+    $this->load->view('header', $pageInfo);
     $this->load->view('videos/videos');
     
     // new
@@ -93,7 +97,7 @@ class Videos extends MY_Controller
       $this->load->view('videos/new_none');
     else
     {
-      $this->load->view('videos/new_start', array('total' => $this->videos_model->get_new_count()));
+      $this->load->view('videos/new_start', array('total' => $newCount));
       foreach ($results_new->result_array() as $row)
       {
         $row['checked_date'] = self::_date($row['checked']);
