@@ -30,7 +30,7 @@ class MY_Controller extends CI_Controller
       $this->yt = new Zend_Gdata_YouTube(Zend_Gdata_AuthSub::getHttpClient($this->session->userdata('token')), $this->config->item('applicationID'), NULL, $this->config->item('developerKey'));
     else
       $this->yt = new Zend_Gdata_YouTube();
-    $this->yt->setMajorProtocolVersion(2);
+    $this->yt->setMajorProtocolVersion(2.1);
   }
 }
 ?>
