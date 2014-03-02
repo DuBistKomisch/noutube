@@ -11,7 +11,7 @@ Requirements
 ============
 
  - PHP 5.2.x or higher
- - A web server with rewrite functionality (apache, nginx, etc.)
+ - A web server, ideally with rewrite functionality (apache, nginx, etc.)
  - A database server (mysql, etc.)
 
 Installation
@@ -26,7 +26,7 @@ You'll need to modify these variables in application/config/config.php to get st
    - your domain and subdirectory with trailing slash
  - `$config['encryption_key']` and `$config['sess_secure']`
    - (optional) add a key if you want to secure your sessions
- - `$config['sess_user_database']` and other session-related config variables
+ - `$config['sess_use_database']` and other session-related config variables
    - (optional) enable if you want to store sessions in your database (see below)
  - `$config['cookie_domain']` and `$['cookie_path']`
    - set to match the respective parts of your `$config['base_url']`
@@ -34,9 +34,9 @@ You'll need to modify these variables in application/config/config.php to get st
 You'll also need to add a few of your own to the end of the file:
 
  - `$config['applicationID']`
-   - I think this is actually ignored by the API now
+   - I think this is actually ignored by the API now, meant to be like a User-Agent string
  - `$config['developerKey']`
-   - obtained by going to the [YouTube API Dashboard](http://code.google.com/apis/youtube/dashboard)
+   - obtained by going to the [Google API Console](http://code.google.com/apis/console) and creating a new project, then creating a new "server" "simple API access" "API key" (this is for the "old" console, good luck using the new one)
  - `$config['applicationName']`
    - the name to use to brand the site
 
@@ -60,7 +60,7 @@ NoUTube requires a background service to regularly poll for new videos.
 
 Simply run `crontab -e` and add the line:
 
-`0 * * * * /path/to/index.php videos poll`
+`0 * * * * php /path/to/index.php videos poll`
 
 There's plenty of documentation on how cron works, so I won't explain it here. Just suffice to say that this will run the service once an hour on the hour.
 
